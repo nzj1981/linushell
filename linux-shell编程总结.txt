@@ -18,4 +18,115 @@ linux shell 编程总结
   $$:是脚本运行的当前进程ID号
   $?:是显示最后命令的退出状态，0 表示没有错误，其他表示有错误
   $-:记录着当前设置的shell选项（常见设置：himBH）
+4.给系统定义欢迎与退出脚本。
+  4.1.欢迎脚本
+	vim ~/.bash_profile
+  
+
+  4.2.退出脚本
+	vim ~/.bash_logout
+	#clear the termimal screen
+	clear
+
+	#clear mysql command history
+	#/bin/rm $HOME/.mysql_history
+
+	echo "Backup files to NAS server"
+	#backup files to NAS server
+5.定义变量及赋值注意点：
+  5.1.在赋值操作符“=”的周围，不要有任何空格。正确格式如下：
+	varName=varValue
+  5.2.算术表达式操作方式
+	# let var=2+1
+	# echo $var
+  5.3.将命令的执行结果赋值给变量，两种方式
+	# var=`pwd` # echo $var 或 # var=$(pwd) # echo $var
+  5.4.Bash的内置命令read读入的内容赋值给变量
+	# echo -n "Enter var:"; read var
+	Enter var:123
+	# echo $var
+	123
+  5.5.变量命名规则：必须以字母或下划线字符“_”开头，后面跟字母、数字或下划线字符，第一个字符不能为数字。不要使用?、*和其他特殊字符命名你的变量。变量区分大小写
+  5.6.使用echo和printf打印变量的值
+	格式：
+	var=123
+	printf "%s\n" $var
+	常用格式
+	%d:以带符号十进制数的格式打印相关参数
+	%f:以浮点数的格式解析并打印相关参数
+	%c:以字符的格式打印相关参数，并且只打印参数中的第一个字符
+	%s:以字符串的格式打印相关参数
+	%n:指定打印的字符个数
+	%%:表示打印一个字符“%”
+  5.7.转义字符
+	\":打印双引号
+	\\:打印一个反斜杠“\”
+	\a:发出告警音
+	\b:删除前一个字符
+	\f:换页符，在某些实现中会清屏，有些会换行。
+	\n:换行符
+	\r:从行头开始，和换行不一样，仍在本行。
+	\t:Tab键
+	\v:竖直tab，和\f相似。
+  5.8.echo命令也提供转义字符的功能，与printf命令中的基本相同，但需要使用“-e”来激活
+	在echo使用中会用到${var}是避免一些歧义，例如：
+	logdir=`pwd`
+	echo "this is get dir ${logdir}/Downloads"
+  5.9. 当引用一个变量时，通常最好用双引号将变量名括起来。
+  5.10.删除变量
+	unset [-fv]:删除相应的变量或函数，-f表示删除一个已定义的函数，-v选项表示删除一个变量。
+  5.11.简单检查变量是否存在
+	${varName:? Error: The variable is not defined}
+  5.12.Shell中的扩展-大括号扩展
+	autumner@autumner-PC:~$ echo a{b,c,d}e
+	abe ace ade
+	autumner@autumner-PC:~$ echo {1..10}
+	1 2 3 4 5 6 7 8 9 10
+	autumner@autumner-PC:~$ echo {a..z}
+	a b c d e f g h i j k l m n o p q r s t u v w x y z
+	autumner@autumner-PC:~$ echo {1..3}{a..c}
+	1a 1b 1c 2a 2b 2c 3a 3b 3c
+	autumner@autumner-PC:~$ echo a{{b,c,d}a,{e,f,g}b,h}i
+	abai acai adai aebi afbi agbi ahi
+	autumner@autumner-PC:~$ echo {a,{1..3},c}
+	autumner@autumner-PC:~$ mkdir ~/{dir1,dir2,dir3}
+	autumner@autumner-PC:~$ echo {10..2..-2}
+	10 8 6 4 2
+	autumner@autumner-PC:~$ echo {10..2..-2}
+	10 8 6 4 2
+  5.13.Shell中的扩展-波浪符号扩展
+	波浪符号扩展可用来指代你自己的主目录，或其他人的主目录。
+	echo ~+ 它会被shell变量PWD的值替代。
+	echo ~- 它会被shell变量LODPWD的替代。
+  5.14.修改Bash提示符
+	vim ~/.bashrc
+	export PS1="\e[0;34m\u@\h \w\n\$\e[m "
+	特殊字符解释：
+	\e[ --指示颜色提示符的开始
+	0;34m --颜色代码，此代码代表的是蓝色，编码格式是x;ym
+	\e[m --指示颜色提示符的结束
+	部分颜色代码如下所示：
+	0;30 --黑色
+	0;31 --红色
+	0;32 --绿色
+	0;33 --褐色
+	0;34 --蓝色
+	0;35 --紫色
+	0;36 --青色
+	\u --当前用户的用户名， \h --主机名，\w --当前工作目录的全路径， \n --新的一行，
+	\$ --如果当前用户UID是0,显示“#”，否则显示“$”, \t --24时制 “HH：MM：SS”格式的当前时间（比如：22：59：25）.
+
+6.常用bash命令学习
+  6.1.ls
+	ls -F --color=auto /lib 
+	将使用不同的特殊字符归类不同的文件类型并且不同的文件类型显示不同的颜色。
+	/ --表示目录，@ --表示链接文件 * --表示可执行文件，无特殊字符 --表示普通文件
+	ls -strlh   --将以长列表格式按文件或目录的修改时间倒序地列出来文件或目录，字节数以友好方式(K,M,G)显示出来，并且在第一列展示。
+  6.2. less
+	less /etc/fstab
+	/ --在less命令打开的文件中，输入字符“/”后跟要搜索的关键字，输入回车，会高亮显示所有搜索到的关键字, n --向下匹配，N --向上匹配，q or ZZ退出less。
+  6.3. who -b --显示系统启动时间 
+  6.4. uptime --命令用于打印系统的运行时间等信息，其中：load average:代表系统过去1分钟，5分钟，15分钟的平均负载。
+
+
 
