@@ -128,5 +128,229 @@ linux shell 编程总结
   6.3. who -b --显示系统启动时间 
   6.4. uptime --命令用于打印系统的运行时间等信息，其中：load average:代表系统过去1分钟，5分钟，15分钟的平均负载。
 
+第四章、shell命令进阶
+7. paste:合并文件
+	paste file1 file2
+	增加分隔符
+	paste -d '|' file1 file2
+	指定多个分隔符
+	paste -d ':,' file1 file2 file3
+8.解压指定文件或目录
+	tar -xvf home_yantaol.tar --wildcards '*.jpg'
+	向已存在的tar包里增加文件或目录
+	tar -rvf home_yantaol.tar /home/yantaol/newfile
+	核实tar包中内容与文件系统中的内容的差异
+	tar -dvf home_yantaol.tar
+9.监测和管理磁盘
+	9.1 mount umount df du
+第五章、Shell编程基础
+10.间接参数扩展
+	${!PARAMETER}
+	# PARAMETER=TEMP
+	# TEMP="It's indirect"
+    # echo ${!PARAMETER}
+It's indirect
+	大小写修改（Bash 4.0的新特性）
+	${PARAMETER^} 首字母大写
+	${PARAMETER^} 全部字母大写
+    ${PARAMETER，} 首字母小写
+	${PARAMETER，，} 全部字母小写
+	${PARAMETER～} 原来字母大写转换小写
+	${PARAMETER～～} 原来字母大写全部转换小写
+	10.1 求字符长度
+	${#PARAMETER}
+autumn@autumn-pc ~/shelldir $ MYSTRING="This is used for replacing string or removing string"
+autumn@autumn-pc ~/shelldir $ echo ${#MYSTRING}
+52
+autumn@autumn-pc ~/shelldir $ echo ${MYSTRING:8}
+used for replacing string or removing string
+autumn@autumn-pc ~/shelldir $ echo ${MYSTRING:8:10}
+used for r
+autumn@autumn-pc ~/shelldir $ echo ${MYSTRING:8:11}
+used for re
+	10.2 使用默认值
+	${PARAMETER:-WORD}
+	${PARAMETER-WORD}
+	${PARAMETER:=WORD}
+	${PARAMETER=WORD}
+	10.3.使用替代值
+	${PARAMETER:+WORD}
+	${PARAMETER+WORD}
+	10.4 echo $- :将扩展为当前的选项标志。
+	echo $$ :将扩展为当前shell进程号
+	echo $0: 将扩展为shell或shell脚本名称
+	echo $_:在shell启动时，它被设为开始运行的shell或shell脚本的路径。
+	10.5.declare指定变量的类型
+	declare -r var=1  --把指定变量定义为只读变量，这些变量不能再被赋予新值或被清除
+	declare -i NUMBER --把指定的变量定义为整数型变量，赋予整数型变量的任何类型的值将被转换成整数。
+	
+11. Bash中的数组变量
+	11.1 显式声明一个数组变量
+	declare -a ARRAYNAME
+autumn@autumn-pc ~/shelldir $ declare -a linux=('Debian' 'Redhat' 'Suse' 'Fedora')
+autumn@autumn-pc ~/shelldir $ echo ${linux[@]}
+Debian Redhat Suse Fedora
+autumn@autumn-pc ~/shelldir $ echo ${linux[*]}
+Debian Redhat Suse Fedora
+autumn@autumn-pc ~/shelldir $ declare -a arr1=("one" "two" "three")
+autumn@autumn-pc ~/shelldir $ echo ${arr1[*]}
+one two three
+autumn@autumn-pc ~/shelldir $ echo ${arr1[1]}
+two
+autumn@autumn-pc ~/shelldir $ echo ${arr1[0]}
+one
+若要引用数组中某一项的内容，必须要使用花括号"{}"，如果索引编号是"@"或"*",那么数组的所有成员都将被引用。
+
+12.shell算术运算
+	12.1 let var=5**2
+	12.2 数字常量
+	let dec=20 默认为十进制
+	let oct=020 默认为八进制
+	let hex=0x20 以0x开头的十六进制
+	let bin=2#111 符号“#”之前的数字2表示些数为二进制 let bin=32#20 三十二进制数，值为20
+	let base64=64#@_ 在六十四进制中，十进制的0～9即用0～9表示，10-35这个26个数依次用小写字母a～z表示，36-61 这26个数依次用大写字母A～Z表示，最后剩余的62和63分别用@和_表示
+	12.3 expr命令是一个用于对表大式进行求值并输出相应结果的命令工具。同样也只支持整数运算。
+	与let相反，表达式中的运算符左右必须包含空格，对于某些运算符，还需要“\”进行转义
+autumn@autumn-pc ~/shelldir $ expr 2 \* 2
+4
+autumn@autumn-pc ~/shelldir $ expr 1 \< 2
+1
+autumn@autumn-pc ~/shelldir $ expr 2 \> 5
+0
+第六章 shell的条件执行
+	13. test命令：文件属性测试；字符串测试；算术测试
+	test -d "$HOME"; echo $?
+第七章 Bash循环
+	14.until循环与while循环类似，也同样基于一个条件，不过它循环条件为假时才执行。
+	var=1
+	until [ $var -gt 3 ]
+	do
+		echo "The for loop is run $var times."
+		var=$(( var + 1 ))
+	done
+	15.select 循环语句特点：
+	1).select语句使用Bash内部变量PS3的值作为它的提示符信息。
+	2).打印到屏幕上的列表LIST中的每一项会在前面加上一个数字编号。
+	3).当用户输入的数字与某一个数字编号一致时，列表中相应的项即被赋予变量VAR
+	4).如果用户输入的内容为空，将重新显示列表LIST中的项和提示符信息。
+	5).可以通过添加一个退出选项，或按ctrl+c或ctrl+d组合键退出select循环
+autumn@autumn-pc ~/shelldir $ cat selectloop.sh 
+#! /bin/bash -
+#author autumner
+#date 2018.3.16
+#filename:selectloop.sh
+
+PS3="Run command: "
+
+select choice in date w hostname "uname -a" Exit
+do
+
+	case $choice in
+	
+	date)
+		echo "=========="
+		echo "Current system date and time:"
+		echo "=========="
+		$choice
+		;;
+	w)
+		
+		echo "=========="
+		echo "Who is logged on and what they are dong;"
+		echo "=========="
+		$choice
+		;;
+	hostname)
+		echo "=========="
+		echo "Hostname"
+		echo "=========="
+		$choice
+		;;
+	"uname -a")
+		echo "=========="
+		echo "Who is logged on and what they are dong;"
+		echo "=========="
+		$choice
+		;;
+	Exit)
+		echo "=========="
+		echo "Bye!"
+		echo "=========="
+		exit 0
+		;;
+	esac
+done
+
+运行：
+autumn@autumn-pc ~/shelldir $ bash selectloop.sh 
+1) date
+2) w
+3) hostname
+4) uname -a
+5) Exit
+Run command: 1
+==========
+Current system date and time:
+==========
+2018年 04月 16日 星期一 15:14:49 CST
+Run command: 2   
+==========
+Who is logged on and what they are dong;
+==========
+ 15:14:55 up  5:07,  1 user,  load average: 0.00, 0.00, 0.00
+USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
+autumn   tty8     :0               10:08    5:07m  2:16   0.25s cinnamon-sessio
+Run command: 4
+==========
+Who is logged on and what they are dong;
+==========
+Linux autumn-pc 4.4.0-75-generic #96-Ubuntu SMP Thu Apr 20 09:56:33 UTC 2017 x86_64 x86_64 x86_64 GNU/Linux
+Run command: 5
+==========
+Bye!
+==========
+第8章函数
+	16.函数定义
+	function name { command1; command2; command3 }
+	或
+	name() { command1; command2; command3 }
+	如果有关键字function，则可能省略圆括号“()”
+	函数调用
+	name var1 var2
+	17.return返回值定义
+	在函数里有shell内置命令return，函数执行到return语句时结束，并且返回到shell脚本中调用函数位置的下一个命令。如果return带有一个数值型参数，则这个参数就是函数的返回值，返回值范围(0~255).
+第九章正则表达式
+	18.需要详细研究
+	19.
+第十章脚本输入处理
+	20.使用shift命令处理命令行参数
+	shift [n] --此命令用于将传递的参数变量向左移
+	n必须是一个小于或等于“$#"的非负整数。如果n为0,位置参数将不会改变。如果没有指定n，将被默认设为1.如果大于$#，位置参数同样不会改变，如果n大于$#或小于0,此命令的返回状态将大于0,否则为0.
+	21.使用for循环读取多个参数
+	...
+	index=1
+	for arg in $*
+	do
+		echo "Arg #$index = $arg"
+		let index+=1
+	done
+	....
+	for arg in $@
+	do
+	echo "Arg #$index = $arg"
+	let index+=1
+	done
+注意：在两个for循环中调用的变量分别为$*和$@，这个两个变量是不加双引号（”“）的，如果加上了其值将扩展为包含所有位置参数的值的单个字符串。
+	22.使用case语句处理命令行选项
+	casechoice.sh -i input.txt -o output.txt
+	23.使用getopts处理多命令行选项
+
+	24.使用getopt处理多命令行选项
+
+	25.获得用户输入
+	read [ -p prompt] [variable1 variable2...]  -p --显示prompt的提示信息
+	read [ -t number] [variable1 variable2..] -t --设置输入超时
+	read -s 隐藏用户输入。
+
 
 
