@@ -1,0 +1,59 @@
+sed阶段总结学习
+1.给所有后缀名为"*.sh"文件的第一行加入#!/bin/bash:
+	sed -i '1i\#\!/bin/bash' *.sh
+注：有个特殊情况，如果有使用touch aa.sh文件时，以上命令执行不成功，
+解决办法需要加入一行空内容就行，比如echo ''>aa.sh,再执行上面就可以了。
+2.删除一个文件中的空行
+	sed -i '/^$/d' file
+2.1删除一个文件指定行到行末
+	sed -i '5,$d' file
+3.查看文件内容
+	sed -n '1,$p' file
+4.替换/打印命令使用
+	-f:指定由sed指令组成的脚本名称
+	s:替换编辑命令
+	p:打印编辑命令
+	-n:取消默认输出
+	{}：大括号用于在同一个地址应用多个命令。
+举例：
+***********************************************
+# sedDebug内容
+/^Index/{
+p
+s/-//
+s/^Index //p
+}
+
+# 文件index的内容
+Index -Shell introduction
+Index -Basic command
+
+#使用sed脚本sedDebug处理后的内容
+sed -nf sedDebug index
+输出结果：
+Index -Shell introduction
+Shell introduction
+Index -Basic command
+Basic command
+***********************************************
+5.打印行号编号命令
+跟在地址后面的等号"="用来打印被匹配的行的行号
+	[line-address]=
+举例:
+# sed脚本sedPrintln的内容
+/ *for (/{
+		=
+		p
+}
+
+# 打印代码中for语句的行号和行本身
+[autumner@lt118 22:05:27 learn_sed]#sed -nf sedPrintln /usr/src/kernels/2.6.32-696.20.1.el6.x86_64/scripts/kallsyms.c 
+87
+	for (i = 0; i < ARRAY_SIZE(text_ranges); ++i) {
+167
+	for (i = 0; i < ARRAY_SIZE(text_ranges); ++i) {
+225
+	for (i = 0; special_symbols[i]; i++)
+316
+	for (i = 0; i < table_cnt; i++) {
+...
