@@ -18,4 +18,8 @@ git reset --hard HEAD^
 git reflog commit_id
 10.查看工作区和版本库里面最新版本的区别：
 git diff HEAD -- readme.txt
+11.提交github
+git push
+Username for 'https://github.com': nzj1981
+Password for 'https://nzj1981@github.com': 
 
