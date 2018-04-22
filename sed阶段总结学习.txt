@@ -57,3 +57,157 @@ Basic command
 316
 	for (i = 0; i < table_cnt; i++) {
 ...
+
+6.读文件命令r与写文件命令w
+6.1直接修改后缀为.txt的文件内容，将文件endOfFile的内容插入到文件的尾部
+cat endOfFile
+Contact us:****@163.com
+***********************
+sed -i '$r endOfFile *.txt
+$:是指定文件最后一行的寻址符号
+******************
+6.2 以"<tag>"字符串匹配文件tagContent的内容附加在被匹配的行的末尾。
+cat first.html
+<html>
+<body>
+<tag>
+</tag>
+</body>
+</html>
+******************************
+cat tagContent
+This is first html script.
+Hello World!
+******************************
+sed '/<tag>$/r tagContent' first.html
+
+6.3 sed写文件命令w操作方法
+把一个文件按照类型分别写入两个文件中
+cat trademarkAndOS 
+AIX Unix
+HP-UX Unix
+IRIX Unix
+RedHat Linux
+Solaris Unix
+SUSE Linux
+Ubuntu Linux
+*******************************
+处理类型脚本cat sedWritefile 
+/Unix$/w type.unix
+/Linux$/w type.linux
+*******************************
+执行sed命令
+sed -f sedWritefile trademarkAndOS 
+分别查看type.unix与type.linux文档。
+6.4 去文件中Unix和Linux后缀
+cat sedWritefile 
+/Unix$/{
+s///
+w type.unix
+}
+/Linux$/{
+s///
+w type.linux
+}
+剩下按上节操作
+7.退出编辑命令q
+打印10行再退出
+sed '10q' file
+
+
+8.sed命令实例
+cat info.txt 
+Linux - Sysadmin
+Databases - Oracle, MySQL, etc.
+Security - Firewall, Network, Online Security etc.
+Cool - Websites
+Storage - NetApp, EMC etc.
+Productivity - Too many technologies to explore, no much time available.
+****************************************************************************
+
+8.1 向文件中添加或插入行
+1）向第五行追加“hello world!”
+sed '5aHello world!' info.txt
+2) 在匹配模式的行之后添加一行内容
+sed '/Databases/a Hello world!' info.txt 
+3）在文件的最后一行后添加两行内容
+sed '$a Hello world!\nHello world!' info.txt
+4) 在文件第三行插入内容
+sed '3i Hello world!' info.txt
+5）在匹配模式的行之前添加一行内容
+sed '/Databases/i Hello world!' info.txt 
+6) 在文件的最后一行前添加两行内容
+sed '$i Hello world!\nHello world!' info.txt
+7） 更改文件中指定的行
+sed '1c Hello world!' info.txt
+8）修改匹配指定模式行
+sed '/Databases/c Hello world!' info.txt 
+9）更改文件的最后一行
+sed '$c Hello world!' info.txt
+10) 删除文件指定行
+sed '2d' info.txt 
+11) 从指定的行开始删除，并每隔固定的行数删除一行
+sed '2~2d' info.txt 
+12) 删除指定范围内的行
+sed '3,6d' info.txt
+13) 删除指定范围以外的行
+sed '3,6!d' info.txt
+14) 删除文件中最后一行
+sed '$d' info.txt
+15) 删除文件中匹配指定模式的行
+sed '/Databases/d' info.txt 
+16) 从匹配指定模式的行删除到文件的最后一行
+sed '/Databases/, $d' info.txt
+17) 删除文件中匹配指定模式的行及其后面n行的内容
+sed '/Databases/, +2d' info.txt
+18) 删除文件中的空行
+sed '/^$/d' info.txt
+19）删除文件中不匹配指定模式的行
+sed '/Databases\|Security/!d' info.txt 
+20）删除文件的指定范围内的行中匹配指定模式的行
+sed '1,4{/etc\./d}' info.txt
+21）替换一行中每个匹配模式的字符串
+sed 's/Databases/DB/' info.txt
+22）替换文件中的匹配指定模式的所有字符串
+sed 's/Databases/DB/g' info.txt
+23）替换文件中第n行匹配指定模式的字符串
+sed 's/Databases/DB/2' info.txt
+24）将发生字符串替换的行写入指定文件(/tmp/sedoutput)，并只打印发生替换的行
+sed -n 's/Databases/DB/gpw /tmp/sedoutput' info.txt 
+25）只替换文件中匹配指定模式的行中的字符串
+将文件info.txt中匹配模式“/-/”的行中的逗号“，”之后的字符串清空
+ sed '/-/s/,.*//g' info.txt 
+26）删除文件中的注释
+sed 's/^#.*//' info.txt
+27） 使用符号‘&’获得匹配的字符串
+sed 's/^[A-Z]/(&)/' info.txt
+获取更多匹配字符串
+sed 's/\(^[A-Z]\)\([a-z]\)/(\1)(\2)/' info.txt 
+28）打印文件中的第n行
+sed -n '4p' info.txt
+29）从文件的第n行开始打印，并每隔m-1行就打印一行
+sed -n '2~2p' info.txt
+30）打印文件的最后一行
+sed -n '$p' info.txt
+31)打印文件的第n～m行
+sed -n '2,6p' info.txt
+32）打印文件的第n行到最后一行
+sed -n '2,$p' info.txt
+33) 打印文件中匹配指定模式的行
+sed -n '/Databases/p' info.txt
+34) 打印文件中从第n行到匹配指定模式的行的内容
+sed -n '1,/Databases/p' info.txt
+35) 打印文件中从匹配指定模式的行到最后一行的内容
+sed -n '/Databases/,$p' info.txt
+36) 打印文件中匹配指定模式的行及其后面的n行
+sed -n '/Databases/,+2p' info.txt
+37）打印文件中从匹配指定模式的行到匹配另一个指定模式的行的内容
+sed -n '/Databases/,/Security/p' info.txt
+38) 打印文件总行数
+sed -n '$=' info.txt
+40）打印日志文件中的报错的行号及其内容
+sed -n '/Error/{=;p}' /var/log/messages
+
+
+
+
