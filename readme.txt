@@ -22,4 +22,26 @@ git diff HEAD -- readme.txt
 git push
 Username for 'https://github.com': nzj1981
 Password for 'https://nzj1981@github.com': 
+12.在工作区的修改全部撤销
+git checkout -- readme.txt
+13.版本库里删除
+git rm
+git commit
+14.分支管理
+Git鼓励大量使用分支：
+
+查看分支：git branch
+
+创建分支：git branch <name>
+
+切换分支：git checkout <name>
+
+创建+切换分支：git checkout -b <name>
+
+合并某分支到当前分支：git merge <name>
+
+删除分支：git branch -d <name>
+
+令牌：jW9oBqsJ2adVnHKibRCB
+15.码云：https://gitee.com/autumner/linuxshell
 
