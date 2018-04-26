@@ -1,4 +1,29 @@
 sed阶段总结学习
+	sed是用来解析和转换文本的工具，它使用简单，是简洁的程序设计语言
+sed能做如下操作：
+	自动化地编辑一个或多个文件
+	简化在多个文件中执行相同编辑任务
+	编写转换程序
+
+	sed维护一种模式空间，即一个工作区域或临时缓冲区，当使用编辑命令时，将在那里存储单个输入行。
+	sed一次处理一行输入的优点是在读取非常庞大的文件时不会出现问题。
+
+	sed命令的两种语法：
+	sed [OPTIONS]... 'COMMAND' [FILE]...
+	sed [OPTIONS] -F SCRIPTFILE [FILE]...
+
+sed常用选项：
+-e ----它告诉sed将下一个参数解释为sed指令，只有在命令行上给出多个sed指定时才需要使用-e选项
+-f ----指定由sed指令组成的脚本的名称 。如果sed脚本的第一行为“#n”，则sed的行为与指定-n选项相同
+-i ----直接修改读取 的内容 ，而不是输出到终端
+-n ----取消默认输出。在一般sed的用法 中，所有来自标准输入的数据一般都会被显示到终端上。但如果使用
+-n参数，只有经过sed处理的行才会被显示输出。
+
+与Shell中的符号“$"不同，sed中的符号“$”用于指定输入文件的最后一行，或是行的末尾（在LHS中），或是字面
+意义的符号（在RHS中）。
+LHS（left-hand side）和RHS（right-hand side）分别指sed指令中的左侧部分和右侧部分。
+比如：替换编辑命令“s/LHS/RHS/”
+
 1.给所有后缀名为"*.sh"文件的第一行加入#!/bin/bash:
 	sed -i '1i\#\!/bin/bash' *.sh
 注：有个特殊情况，如果有使用touch aa.sh文件时，以上命令执行不成功，
@@ -207,6 +232,89 @@ sed -n '/Databases/,/Security/p' info.txt
 sed -n '$=' info.txt
 40）打印日志文件中的报错的行号及其内容
 sed -n '/Error/{=;p}' /var/log/messages
+41) 在文件1的每一行之后都读入一次文件2的内容
+cat 1.txt
+a
+b
+
+***************************************
+cat 2.txt
+e
+f
+
+****************************************
+sed 'r 2.txt' 1.txt
+a
+e
+f
+b
+e
+f
+42)在文件1的指定行之后读入文件2的内容
+sed '2r 2.txt' 1.txt
+a
+b
+e
+f
+****************************************
+43)在文件1的匹配指定模式的行之后读入文件2的内容
+sed '/a/r 2.txt' 1.txt
+a
+e
+f
+b
+44)将文件1的第n行的内容写入文件2中
+cat here_with_you.txt
+To all my friends
+对我所有好友来讲
+The night is young
+夜未央
+The muisc`s loud
+乐未殇
+They playing our song
+他们在我们喜爱的歌声里欢畅
+No where else that I belong
+我只想和你在此相伴，不想去任何其他地方
+***********************************
+sed -n '2w output.txt' here_with_you.txt
+
+cat output.txt
+
+对我所有好友来讲
+******************************************
+45)将文件1的指定几行写入文件2
+sed -n -e '1w output.txt' -e '$w output.txt' here_with_you.txt
+将文件1的第一行和最后一行写入文件2
+cat output.txt
+
+To all my friends
+我只想和你在此相伴，不想去任何其他地方
+***********************************************
+46)将文件1的匹配某几个模式的行写入文件2
+sed -n '/young\|歌声/w output.txt' here_with_you.txt 
+
+cat output.txt
+The night is young
+他们在我们喜爱的歌声里欢畅
+**************************************************
+46) 将文件1中从匹配指定模式的行到最后一行的内容写入文件2
+sed -n '/乐/,$w output.txt' here_with_you.txt 
+
+cat output.txt
+乐未殇
+They playing our song
+他们在我们喜爱的歌声里欢畅
+No where else that I belong
+我只想和你在此相伴，不想去任何其他地方
+***************************************************
+47) 将文件1中匹配指定模式的行及其后n行的内容写入文件2
+sed -n '/乐/,+2w output.txt' here_with_you.txt 
+cat output.txt
+乐未殇
+They playing our song
+他们在我们喜爱的歌声里欢畅
+**********************************************
+
 
 
 
